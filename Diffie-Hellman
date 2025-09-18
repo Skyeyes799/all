@@ -1,0 +1,33 @@
+import java.math.BigInteger;
+import java.util.Scanner;
+
+public class DiffieHellmanAlgorithmExample {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Enter value for public key G: ");
+        BigInteger G = sc.nextBigInteger();
+
+        System.out.print("Enter value for public key P: ");
+        BigInteger P = sc.nextBigInteger();
+
+        System.out.print("Enter value for private key a (User1): ");
+        BigInteger a = sc.nextBigInteger();
+
+        System.out.print("Enter value for private key b (User2): ");
+        BigInteger b = sc.nextBigInteger();
+
+        BigInteger x = G.modPow(a, P);
+        BigInteger y = G.modPow(b, P);
+
+        BigInteger ka = y.modPow(a, P);
+        BigInteger kb = x.modPow(b, P);
+
+        System.out.println("Public value sent by User1 (x): " + x);
+        System.out.println("Public value sent by User2 (y): " + y);
+        System.out.println("Secret key for User1: " + ka);
+        System.out.println("Secret key for User2: " + kb);
+
+        sc.close();
+    }
+}
