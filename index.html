@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blockchain File Vault — Verify, Encrypt & Store Files Securely</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.6.0/dist/ethers.umd.min.js"></script>
+  <script defer src="app.js"></script>
+
+  <style>
+    /* ======== BASE ======== */
+    body {
+      font-family: "Inter", sans-serif;
+      background: #f4f6f9;
+      color: #1e293b;
+      margin: 0;
+      padding: 30px;
+      animation: fadeIn 0.8s ease-in;
+    }
+
+    h1 {
+      text-align: center;
+      color: #0f172a;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+      animation: slideDown 0.8s ease;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #475569;
+      margin-bottom: 30px;
+      font-size: 15px;
+      animation: fadeIn 1s ease-in;
+    }
+
+    /* ======== SECTIONS ======== */
+    .section {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+      margin: 20px auto;
+      max-width: 820px;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: sectionFadeIn 0.8s ease forwards;
+      transition: all 0.35s ease;
+    }
+
+    /* ✨ Section hover animation */
+    .section:hover {
+      transform: translateY(-5px) scale(1.01);
+      box-shadow: 0 8px 18px rgba(37, 99, 235, 0.12);
+      border: 1px solid rgba(37, 99, 235, 0.15);
+    }
+
+    /* Staggered animation delays */
+    .section:nth-of-type(1) { animation-delay: 0.3s; }
+    .section:nth-of-type(2) { animation-delay: 0.5s; }
+    .section:nth-of-type(3) { animation-delay: 0.7s; }
+    .section:nth-of-type(4) { animation-delay: 0.9s; }
+    .section:nth-of-type(5) { animation-delay: 1.1s; }
+
+    /* ======== BUTTONS ======== */
+    button {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 18px;
+      margin: 5px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+    }
+
+    button:hover {
+      background: #1e3a8a;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+    }
+
+    input[type="file"] {
+      border: 2px dashed #94a3b8;
+      border-radius: 10px;
+      padding: 10px;
+      width: 100%;
+      margin-top: 10px;
+      cursor: pointer;
+      background: #f8fafc;
+      transition: all 0.2s ease;
+    }
+
+    input[type="file"]:hover {
+      background: #f1f5f9;
+    }
+
+    #walletAddress, #signatureOutput, #verificationOutput, #output {
+      background: #f1f5f9;
+      padding: 10px;
+      border-radius: 8px;
+      word-break: break-all;
+      margin-top: 8px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    /* ======== LINKS ======== */
+    a {
+      color: #2563eb;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    a:hover {
+      color: #1e3a8a;
+      text-decoration: underline;
+    }
+
+    /* ======== FOOTER ======== */
+    #footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 13px;
+      color: #64748b;
+      animation: fadeIn 1.4s ease;
+    }
+
+    /* ======== MODAL ======== */
+    #keyModal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      justify-content: center;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 9999;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal-content {
+      background: #fff;
+      border-radius: 12px;
+      padding: 25px;
+      width: 400px;
+      max-width: 90%;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      animation: popIn 0.4s ease;
+    }
+
+    #aesKeyBox {
+      width: 100%;
+      height: 120px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 10px;
+      margin-top: 10px;
+      background: #f8fafc;
+      font-size: 13px;
+      font-family: monospace;
+      resize: none;
+    }
+
+    #copyStatus {
+      color: #16a34a;
+      font-size: 13px;
+      display: none;
+      margin-top: 5px;
+    }
+
+    /* ======== LOADING OVERLAY ======== */
+    #loadingOverlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      animation: fadeIn 0.3s ease;
+    }
+
+    #loadingBox {
+      background: #ffffff;
+      padding: 16px 32px;
+      border-radius: 8px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      border: 1px solid #e5e7eb;
+      animation: popIn 0.3s ease;
+    }
+
+    #loadingText {
+      margin-top: 8px;
+      color: #2563eb;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    /* ======== VERIFICATION ALERT ======== */
+    .verify-alert {
+      display: none;
+      text-align: center;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.4s ease;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .verify-success {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #22c55e;
+    }
+
+    .verify-fail {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #ef4444;
+    }
+
+    /* ======== ANIMATIONS ======== */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes sectionFadeIn {
+      from { opacity: 0; transform: translateY(25px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Blockchain File Vault</h1>
+  <p class="subtitle">Verify, Encrypt & Store Files Securely on Ethereum + IPFS</p>
+
+  <!-- WALLET -->
+  <div class="section">
+    <h3>🦊 Wallet Connection</h3>
+    <button id="connectButton">Connect Wallet</button>
+    <p id="walletAddress">❌ Not Connected</p>
+  </div>
+
+  <!-- FILE UPLOAD -->
+  <div class="section">
+    <h3>📁 Select Files</h3>
+    <input type="file" id="fileInput" multiple />
+  </div>
+
+  <!-- SIGN -->
+  <div class="section">
+    <h3>✍️ Sign File</h3>
+    <button id="signButton">Sign File</button>
+    <p id="signatureOutput">No signature yet.</p>
+  </div>
+
+  <!-- BLOCKCHAIN ACTIONS -->
+  <div class="section">
+    <h3>🧱 Blockchain Actions (Sepolia)</h3>
+    <label><input type="checkbox" id="encryptToggle" checked /> Enable AES Encryption</label><br><br>
+    <button id="storeButton">💾 Upload + Store</button>
+    <button id="verifyButton">🔍 Verify File</button>
+    <p id="verificationOutput">No verification yet.</p>
+    <div id="verifyStatus" class="verify-alert"></div>
+  </div>
+
+  <!-- AUDIT TRAIL -->
+  <div class="section">
+    <h3>📜 Blockchain Audit Log</h3>
+    <button id="fetchAudit">View Stored Files</button>
+    <button id="clearOutput" class="btn-clear">Clear Log</button>
+    <div id="output"></div>
+  </div>
+
+  <!-- AES MODAL -->
+  <div id="keyModal">
+    <div class="modal-content">
+      <h3>🔑 AES Encryption Key</h3>
+      <p>Copy and store this key securely — you’ll need it to decrypt your file.</p>
+      <textarea id="aesKeyBox" readonly></textarea>
+      <button id="copyKey">📋 Copy Key</button>
+      <div id="copyStatus">✅ Copied!</div>
+      <br />
+      <button class="btn-clear" onclick="document.getElementById('keyModal').style.display='none'">Close</button>
+    </div>
+  </div>
+
+  <!-- LOADING OVERLAY -->
+  <div id="loadingOverlay">
+    <div id="loadingBox">
+      <div>⏳</div>
+      <div id="loadingText">Processing...</div>
+    </div>
+  </div>
+
+  <div id="footer">
+    © 2025 Blockchain File Vault | MINIPROJECT CY 🔐
+  </div>
+
+</body>
+</html>
