@@ -245,7 +245,7 @@ storeButton.addEventListener("click", async () => {
           verifyStatus.className = "verify-alert verify-fail";
         }
         verifyStatus.style.display = "block";
-        setTimeout(() => (verifyStatus.style.display = "none"), 4000);
+        setTimeout(() => (verifyStatus.style.display = "none"), 7000);
       } catch (err) {
         hideLoading();
         verificationOutput.innerHTML += `❌ ${err.message}<br>`;
