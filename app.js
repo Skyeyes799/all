@@ -21,10 +21,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ✅ Pinata JWT
   const PINATA_JWT =
-    "https://app.pinata.cloud";
-
-  // ✅ Smart Contract
-  const contractAddress = "https://remix.ethereum.org";
+    "PINATA CLOUD";
+  const contractAddress = "REMIX ORG";
   const contractABI = [
     {
       inputs: [
@@ -145,19 +143,47 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ==== UPLOAD TO PINATA ====
-  async function uploadToPinata(file) {
+ async function uploadToPinata(file) {
+  try {
+    if (!PINATA_JWT || PINATA_JWT.trim() === "") {
+      throw new Error("Pinata JWT is missing.");
+    }
+
     const formData = new FormData();
     formData.append("file", file);
-    const res = await fetch("https://api.pinata.cloud/pinning/pinFileToIPFS", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${PINATA_JWT}` },
-      body: formData,
-    });
-    if (!res.ok) throw new Error(`Pinata upload failed (${res.status})`);
-    const data = await res.json();
-    return data.IpfsHash;
-  }
 
+    const response = await fetch(
+      "https://api.pinata.cloud/pinning/pinFileToIPFS",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${PINATA_JWT.trim()}`
+        },
+        body: formData
+      }
+    );
+
+    const responseText = await response.text();
+    console.log("Pinata Status:", response.status);
+    console.log("Pinata Response:", responseText);
+
+    if (!response.ok) {
+      throw new Error(`Pinata upload failed (${response.status})`);
+    }
+
+    const data = JSON.parse(responseText);
+
+    if (!data.IpfsHash) {
+      throw new Error("Invalid response from Pinata.");
+    }
+
+    return data.IpfsHash;
+
+  } catch (error) {
+    console.error("Upload Error:", error);
+    throw error;
+  }
+}
   // ==== STORE FILE ====
 storeButton.addEventListener("click", async () => {
   if (!contract) return alert("⚠️ Connect wallet first!");
@@ -241,11 +267,11 @@ storeButton.addEventListener("click", async () => {
           verifyStatus.textContent = `✅ File "${file.name}" verified successfully!`;
           verifyStatus.className = "verify-alert verify-success";
         } else {
-          verifyStatus.textContent = `⚠️ File "${file.name}" not found on blockchain.`;
+          verifyStatus.textContent = `❌ Integrity Verification Failed. File "${file.name}" not registered or has been modified.`;
           verifyStatus.className = "verify-alert verify-fail";
         }
         verifyStatus.style.display = "block";
-        setTimeout(() => (verifyStatus.style.display = "none"), 7000);
+setTimeout(() => (verifyStatus.style.display = "none"), 12000);
       } catch (err) {
         hideLoading();
         verificationOutput.innerHTML += `❌ ${err.message}<br>`;
@@ -315,11 +341,14 @@ storeButton.addEventListener("click", async () => {
     await navigator.clipboard.writeText(keyField.value);
     const status = document.getElementById("copyStatus");
     status.style.display = "block";
-    setTimeout(() => (status.style.display = "none"), 1500);
+    setTimeout(() => (status.style.display = "none"), 2000);
   });
 
   // ==== CLEAR OUTPUT ====
-  document.getElementById("clearOutput").addEventListener("click", () => {
+   document.getElementById("clearOutput").addEventListener("click", () => {
     output.innerHTML = "🧾 Logs cleared.";
+    setTimeout(()=>{
+      output.innerHTML="";
+    },4000);
   });
 });
