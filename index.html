@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Blockchain File Vault — Verify, Encrypt & Store Files Securely</title>
+   <title>BLOCKVAULT: A Blockchain-Based Decentralized File Verification and Secure Storage System</title>
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.6.0/dist/ethers.umd.min.js"></script>
   <script defer src="app.js"></script>
 
@@ -31,7 +31,8 @@
       text-align: center;
       color: #475569;
       margin-bottom: 30px;
-      font-size: 15px;
+      font-size: 20px;
+      font-weight:500;
       animation: fadeIn 1s ease-in;
     }
 
@@ -252,8 +253,11 @@
 
 <body>
 
-  <h1>Blockchain File Vault</h1>
-  <p class="subtitle">Verify, Encrypt & Store Files Securely on Ethereum + IPFS</p>
+  <h1>BLOCKVAULT</h1>
+  <p class="subtitle">
+    A Blockchain-Based Decentralized File Verification and Secure Storage System
+  </p>
+
 
   <!-- WALLET -->
   <div class="section">
@@ -278,7 +282,7 @@
   <!-- BLOCKCHAIN ACTIONS -->
   <div class="section">
     <h3>🧱 Blockchain Actions (Sepolia)</h3>
-    <label><input type="checkbox" id="encryptToggle" checked /> Enable AES Encryption</label><br><br>
+    <p>🔐 AES-256 Encryption is enabled by default for all uploads.</p>
     <button id="storeButton">💾 Upload + Store</button>
     <button id="verifyButton">🔍 Verify File</button>
     <p id="verificationOutput">No verification yet.</p>
@@ -315,7 +319,7 @@
   </div>
 
   <div id="footer">
-    © 2025 Blockchain File Vault | MINIPROJECT CY 🔐
+    © 2026 BLOCKVAULT | A Blockchain-Based Decentralized File Verification and Secure Storage System 🔐
   </div>
 
 </body>
